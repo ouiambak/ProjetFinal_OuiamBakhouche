@@ -1525,7 +1525,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100154, guid: b69174d668ba02d44b14a084b217670a, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100172, guid: b69174d668ba02d44b14a084b217670a, type: 3}
       propertyPath: m_IsActive
@@ -2936,6 +2936,38 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 1598d425a92a7d541a0c78d4d4f598f9, type: 3}
   m_PrefabInstance: {fileID: 1182910882}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1215779253
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1215779254}
+  m_Layer: 0
+  m_Name: Skills
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1215779254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1215779253}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1287811910}
+  m_Father: {fileID: 1761891306}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1221209530
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3130,6 +3162,60 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 6d7bcebe78eeff74daaa56ffe40b7b83, type: 3}
   m_PrefabInstance: {fileID: 1243506166}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1255561886 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400072, guid: b69174d668ba02d44b14a084b217670a, type: 3}
+  m_PrefabInstance: {fileID: 599134395}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1287811909
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1287811910}
+  - component: {fileID: 1287811911}
+  m_Layer: 0
+  m_Name: Fireball
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1287811910
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1287811909}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1215779254}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1287811911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1287811909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28e15359f93386540aa4e97152b9c949, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _fireball: {fileID: 1437852727857484025, guid: fd437132d7d641d4f9e4e505f608a5a3, type: 3}
+  _characterHand: {fileID: 1255561886}
+  _collDownDelay: 4
+  _animationDelay: 0.4
+  _animator: {fileID: 1570638489}
 --- !u!1001 &1293968800
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3873,6 +3959,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400040, guid: b69174d668ba02d44b14a084b217670a, type: 3}
   m_PrefabInstance: {fileID: 599134395}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &1570638489 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9500000, guid: b69174d668ba02d44b14a084b217670a, type: 3}
+  m_PrefabInstance: {fileID: 599134395}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1570638490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4157,7 +4248,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _movementSpeed: 5
-  _stoppingDistance: 0.75
+  _stopingDistance: 0.75
   _attackCoolDown: 1.5
   _damage: 5
 --- !u!4 &1761891306
@@ -4173,6 +4264,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1570638488}
+  - {fileID: 1215779254}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

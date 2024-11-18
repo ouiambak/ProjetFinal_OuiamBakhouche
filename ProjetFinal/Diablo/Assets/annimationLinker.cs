@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class annimationLinker : MonoBehaviour
 {
-   /* public void ResetAttack()
+    public void ResetAttack()
     {
         GetComponentInParent<PlayerController>().ResetAttack();
-    }*/
+    }
 }
