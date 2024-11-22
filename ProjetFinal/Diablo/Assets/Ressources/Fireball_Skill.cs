@@ -37,6 +37,9 @@ public class Fireball_Skill : MonoBehaviour
             }
         }
     }
+    public float GetCoolDownRatio(){
+        return 1f-(_timer/_collDownDelay);
+    }
     private IEnumerator SendFireball(Transform target)
     {
         _animator.SetBool("IsAttacking", true);
