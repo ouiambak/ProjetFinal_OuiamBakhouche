@@ -10,6 +10,8 @@ public class ObjectSon : MonoBehaviour
     private Transform _target;
     public event Action _OnDestroyed;
 
+    [SerializeField] private float _speed = 5f; 
+    [SerializeField] private float _minDistance = 2f; 
     public void SetTarget(Transform newTarget)
     {
         _target = newTarget;
@@ -17,16 +19,33 @@ public class ObjectSon : MonoBehaviour
 
     void Update()
     {
-        if (_target == null) return;
+        if (_target != null)
+        {
+            
+            float distanceToTarget = Vector3.Distance(transform.position, _target.position);
 
-        
-        transform.position = Vector3.MoveTowards(transform.position, _target.position, _followSpeed * Time.deltaTime);
+            if (distanceToTarget > _minDistance)
+            {
+                
+                Vector3 direction = (_target.position - transform.position).normalized;
+                transform.position += direction * _speed * Time.deltaTime;
+            }
+        }
     }
 
-    private void OnDestroy()
+    void OnDrawGizmos()
     {
-        _OnDestroyed?.Invoke();
+        if (_target != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(_target.position, _minDistance); 
+        }
     }
+
+   private void OnDestroy()
+   {
+        _OnDestroyed?.Invoke();
+   }
 }
 
 

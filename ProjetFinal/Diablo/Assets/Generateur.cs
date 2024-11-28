@@ -7,7 +7,7 @@ public class Generateur : MonoBehaviour
     [SerializeField] private GameObject _prefabToSpawn; 
     [SerializeField] private Transform _targetPlayer; 
     [SerializeField] private int _maxInstances = 50; 
-    [SerializeField] private float _spawnInterval = 3f; 
+    [SerializeField] private float _spawnInterval = 5f; 
     [SerializeField] private Vector3 _spawnAreaMin = new Vector3(-10, 2.3f, 0); 
     [SerializeField] private Vector3 _spawnAreaMax = new Vector3(10, 2.3f, 0); 
 
