@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _health: 100
+  _animator: {fileID: 2217114978053991182}
 --- !u!54 &2217114977384868689
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -92,6 +93,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _followSpeed: 5
+  _speed: 5
+  _minDistance: 2
 --- !u!1 &2217114978053958673
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,9 +5,9 @@ public class ObjectToSpawner : MonoBehaviour
 {
     [SerializeField] private float _selfDestroyMaxDelay = 10f;
     [SerializeField] private MeshRenderer _meshRenderer;
-    [SerializeField] private float moveSpeed = 2f; 
-    [SerializeField] private float directionChangeInterval = 1f; 
-
+    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float directionChangeInterval = 1f;
+    [SerializeField] private Animator _animator;  
     private Vector3 randomDirection;
 
     void Start()
@@ -16,11 +16,15 @@ public class ObjectToSpawner : MonoBehaviour
         _meshRenderer.material.color = Random.ColorHSV(0f, 1f);
         Destroy(gameObject, Random.Range(0f, _selfDestroyMaxDelay));
         StartCoroutine(ChangeDirectionPeriodically());
+        _animator.SetBool("IsWalking", true);  
     }
 
     void Update()
     {
-        transform.Translate(randomDirection * moveSpeed * Time.deltaTime, Space.World);
+        if (randomDirection != Vector3.zero)
+        {
+            transform.Translate(randomDirection * moveSpeed * Time.deltaTime, Space.World);
+        }
     }
 
     private IEnumerator ChangeDirectionPeriodically()
@@ -40,8 +44,10 @@ public class ObjectToSpawner : MonoBehaviour
             Random.Range(-1f, 1f)
         ).normalized;
     }
+
     private void OnDestroy()
     {
         GameManager._instance.DecreaseNbOfObject();
+        _animator.SetBool("IsWalking", false);  
     }
 }

@@ -3,9 +3,8 @@ using UnityEngine;
 public class HealthAndDefense : MonoBehaviour
 {
     [SerializeField] private int _health = 100;
-    private Animator _animator;
-    public bool _IsDying { get; private set; }
-
+    [SerializeField] private Animator _animator;
+ 
     public void TakeDamage(int damage)
     {
         _health -= damage;
@@ -22,7 +21,7 @@ public class HealthAndDefense : MonoBehaviour
     }
     private void Die()
     {
-        _IsDying = true;
+        
         _animator.SetBool("IsDying", true);
         Destroy(gameObject, 2f);
     }
