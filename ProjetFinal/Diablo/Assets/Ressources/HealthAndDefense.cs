@@ -3,8 +3,10 @@ using UnityEngine;
 public class HealthAndDefense : MonoBehaviour
 {
     [SerializeField] private int _health = 100;
-    [SerializeField] private Animator _animator;
- 
+
+    public delegate void OnDeath();
+    public event OnDeath OnEnemyDeath;
+
     public void TakeDamage(int damage)
     {
         _health -= damage;
@@ -14,20 +16,21 @@ public class HealthAndDefense : MonoBehaviour
             Die();
         }
     }
+
     public void ReceiveDamage(int damage)
     {
         _health = damage;
-        Debug.Log("Health remaining" + _health);
+        Debug.Log("Health remaining: " + _health);
     }
+
     private void Die()
     {
-        
-        _animator.SetBool("IsDying", true);
+        OnEnemyDeath?.Invoke();
         Destroy(gameObject, 2f);
     }
+
     public bool IsDead()
     {
         return _health <= 0;
-
     }
 }
