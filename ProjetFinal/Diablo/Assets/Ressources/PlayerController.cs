@@ -78,6 +78,10 @@ public class PlayerController : MonoBehaviour
         {
             Attack();
         }
+        else
+        {
+            ResetAttack();
+        }
     }
 
     private void Attack()

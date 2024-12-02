@@ -1,56 +1,42 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Generateur : MonoBehaviour
 {
-    [SerializeField] private GameObject _prefabToSpawn; 
-    [SerializeField] private Transform _targetPlayer; 
-    [SerializeField] private int _maxInstances = 50; 
-    [SerializeField] private float _spawnInterval = 5f; 
-    [SerializeField] private Vector3 _spawnAreaMin = new Vector3(-10, 2.3f, 0); 
-    [SerializeField] private Vector3 _spawnAreaMax = new Vector3(10, 2.3f, 0); 
+    [SerializeField] private GameObject _prefabToSpawn;
+    [SerializeField] private int _maxInstances = 20;
+    [SerializeField] private float _spawnDelay = 1f; 
 
     private int _currentInstances = 0;
+    private bool _isSpawning = false;
 
-    void Start()
+    void Update()
     {
-        StartCoroutine(SpawnObjects());
+        if (!_isSpawning && _currentInstances < _maxInstances)
+        {
+            StartCoroutine(SpawnObjectWithDelay());
+        }
     }
 
-    private IEnumerator SpawnObjects()
+    private IEnumerator SpawnObjectWithDelay()
     {
-        while (true)
+        _isSpawning = true; 
+        while (_currentInstances < _maxInstances)
         {
-            if (_currentInstances < _maxInstances)
-            {
-                SpawnObject();
-            }
-            yield return new WaitForSeconds(_spawnInterval);
+            SpawnObject();
+            yield return new WaitForSeconds(_spawnDelay); 
         }
+        _isSpawning = false; 
     }
 
     private void SpawnObject()
     {
-        
-        Vector3 randomPosition = new Vector3(
-            Random.Range(-_spawnAreaMin.x, _spawnAreaMax.x),
-            Random.Range(-_spawnAreaMin.y, _spawnAreaMax.y),
-            Random.Range(-_spawnAreaMin.z, _spawnAreaMax.z)
-        );
-
-        
-        GameObject spawnedObject = Instantiate(_prefabToSpawn, randomPosition, Quaternion.identity);
-
-
-        ObjectSon follower = spawnedObject.GetComponent<ObjectSon>();
-        if (follower != null)
-        {
-            follower.SetTarget(_targetPlayer);
-        }
-
+        GameObject spawnedObject = Instantiate(_prefabToSpawn, transform.position, Quaternion.identity);
         _currentInstances++;
-        spawnedObject.GetComponent<ObjectSon>()._OnDestroyed += HandleObjectDestroyed;
+        if (spawnedObject.TryGetComponent<ObjectSon>(out ObjectSon objectSon))
+        {
+            objectSon._OnDestroyed += HandleObjectDestroyed;
+        }
     }
 
     private void HandleObjectDestroyed()
@@ -58,4 +44,3 @@ public class Generateur : MonoBehaviour
         _currentInstances--;
     }
 }
-
