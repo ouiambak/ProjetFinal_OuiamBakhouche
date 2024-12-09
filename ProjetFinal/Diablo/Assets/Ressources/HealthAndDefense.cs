@@ -26,7 +26,7 @@ public class HealthAndDefense : MonoBehaviour
     private void Die()
     {
         OnEnemyDeath?.Invoke();
-        Destroy(gameObject, 2f);
+        Destroy(gameObject, 0.5f);
     }
 
     public bool IsDead()

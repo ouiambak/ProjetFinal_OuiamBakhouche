@@ -9,9 +9,11 @@ public class EnnemieMeleeController : MonoBehaviour
     [SerializeField] private int _damage = 10;
 
     private Transform _hero;
-    private bool isDead = false;
-    private bool isAttacking = false;
-    private float lastAttackTime = 0f;
+    private bool _isDead = false;
+    private bool _isAttacking = false;
+    private float _lastAttackTime = 0f;
+
+    private Rigidbody _rigidbody;
 
     private void Start()
     {
@@ -23,6 +25,12 @@ public class EnnemieMeleeController : MonoBehaviour
             return;
         }
 
+        _rigidbody = GetComponent<Rigidbody>();
+        if (_rigidbody != null)
+        {
+            _rigidbody.isKinematic = false;
+        }
+
         HealthAndDefense healthComponent = GetComponent<HealthAndDefense>();
         if (healthComponent != null)
         {
@@ -32,40 +40,41 @@ public class EnnemieMeleeController : MonoBehaviour
 
     private void Update()
     {
-        if (!isDead && _hero != null)
+        if (!_isDead && _hero != null)
         {
             float distanceToHero = Vector3.Distance(transform.position, _hero.position);
 
             if (distanceToHero > _attackRange)
             {
                 FollowHero();
+                _animator.SetBool("IsAttacking", false);
             }
             else
             {
                 AttackHero();
             }
         }
-        else if (!isDead)
+        else if (!_isDead)
         {
             _animator.SetBool("IsBreathing", true);
         }
 
-        if (isAttacking && !IsAttacking())
+        if (_isAttacking && !IsAttacking())
         {
-            isAttacking = false; 
-            _animator.SetBool("IsWalking", false); 
+            _isAttacking = false;
+            _animator.SetBool("IsWalking", false);
         }
     }
 
     private void FollowHero()
     {
-        if (isAttacking) return;
+        if (_isAttacking) return;
 
         Vector3 directionToHero = (_hero.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(directionToHero);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
-        transform.Translate(directionToHero * _moveSpeed * Time.deltaTime, Space.World);
-
+        Vector3 moveDirection = directionToHero * _moveSpeed;
+        _rigidbody.velocity = new Vector3(moveDirection.x, _rigidbody.velocity.y, moveDirection.z);  
         _animator.SetBool("IsWalking", true);
         _animator.SetBool("IsBreathing", false);
     }
@@ -74,11 +83,11 @@ public class EnnemieMeleeController : MonoBehaviour
     {
         StopMoving();
 
-        if (Time.time - lastAttackTime >= _attackCooldown)
+        if (Time.time - _lastAttackTime >= _attackCooldown)
         {
-            lastAttackTime = Time.time;
+            _lastAttackTime = Time.time;
             _animator.SetTrigger("IsAttacking");
-            isAttacking = true;
+            _isAttacking = true;
             Invoke(nameof(DealDamage), 0.5f);
         }
     }
@@ -93,20 +102,23 @@ public class EnnemieMeleeController : MonoBehaviour
 
     private void StopMoving()
     {
+        _rigidbody.velocity = Vector3.zero; 
         _animator.SetBool("IsWalking", false);
     }
 
     private bool IsAttacking()
     {
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-        return stateInfo.IsName("Attack"); 
+        return stateInfo.IsName("Attack");
     }
 
     private void HandleDeath()
     {
-        isDead = true;
+        _isDead = true;
         _animator.SetBool("IsWalking", false);
         _animator.SetBool("IsDying", true);
         _animator.SetBool("IsBreathing", false);
+        _animator.SetBool("IsAttacking", false);
+        _rigidbody.velocity = Vector3.zero; 
     }
 }
