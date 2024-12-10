@@ -48,12 +48,14 @@ public class KnifeAttack_Skill : MonoBehaviour
 
     private IEnumerator PerformKnifeAttack()
     {
+        // Lancer l'animation de casting immédiatement après l'entrée de la touche
         _animator.SetBool("IsCasting", true);
+        // Attendez le délai d'animation avant d'effectuer l'attaque
         yield return new WaitForSeconds(_animationDelay);
-
+        // Détection des ennemis à portée d'attaque
         Collider[] hits = Physics.OverlapSphere(transform.position, _attackRange);
         bool enemyAttacked = false;
-
+        // Appliquez les dégâts aux ennemis à proximité
         foreach (var hit in hits)
         {
             HealthAndDefense enemyHealth = hit.GetComponent<HealthAndDefense>();
@@ -70,6 +72,7 @@ public class KnifeAttack_Skill : MonoBehaviour
             }
         }
 
+        // Réinitialiser l'animation si aucun ennemi n'a été touché
         if (!enemyAttacked)
         {
             _animator.SetBool("IsCasting", false);
@@ -78,8 +81,10 @@ public class KnifeAttack_Skill : MonoBehaviour
         _timer = 0;
         yield return new WaitForSeconds(_animationDelay);
 
+        // Réinitialiser l'animation après le délai
         _animator.SetBool("IsCasting", false);
     }
+
 
     private void DisplayDamageText(string damageMessage)
     {
