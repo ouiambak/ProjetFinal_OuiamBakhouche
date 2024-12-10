@@ -17,9 +17,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 _targetPosition;
     private HealthAndDefense _currentEnemy;
     private bool _isWalking = false;
-
-    // Variables pour gérer l'état du pouvoir spécial
     private bool _isPowerEffectActive = false;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip _attackSound;         
+    [SerializeField] private AudioClip _knifeAttackSound;    
+    [SerializeField] private AudioClip _shieldCollectSound;   
+    private AudioSource _audioSource;                        
 
     void Start()
     {
@@ -38,11 +42,15 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("Renderer not found on the player.");
         }
+        _audioSource = GetComponent<AudioSource>();
+        if (_audioSource == null)
+        {
+            _audioSource = gameObject.AddComponent<AudioSource>(); 
+        }
     }
 
     void Update()
     {
-        // Activation/Désactivation du pouvoir spécial avec la touche 'T'
         if (Input.GetKeyDown(KeyCode.T))
         {
             if (_isPowerEffectActive)
@@ -57,7 +65,6 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Mouvement du joueur
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
@@ -79,7 +86,7 @@ public class PlayerController : MonoBehaviour
                 if (enemy != null)
                 {
                     _currentEnemy = enemy;
-                    FireAttack();
+                    FireAttack(); 
                 }
             }
         }
@@ -112,6 +119,7 @@ public class PlayerController : MonoBehaviour
         if (_currentEnemy != null)
         {
             _animator.SetTrigger("IsAttacking");
+            PlaySound(_attackSound);
             _currentEnemy.ReceiveDamage(_damage);
         }
     }
@@ -121,6 +129,7 @@ public class PlayerController : MonoBehaviour
         if (_currentEnemy != null)
         {
             _animator.SetTrigger("IsCasting");
+            PlaySound(_knifeAttackSound); 
             _currentEnemy.ReceiveDamage(_damage);
         }
     }
@@ -144,5 +153,16 @@ public class PlayerController : MonoBehaviour
         {
             _playerRenderer.material = _originalMaterial;
         }
+    }
+    private void PlaySound(AudioClip clip)
+    {
+        if (_audioSource != null && clip != null)
+        {
+            _audioSource.PlayOneShot(clip);
+        }
+    }
+    public void CollectShield()
+    {
+        PlaySound(_shieldCollectSound); 
     }
 }
