@@ -20,40 +20,61 @@ public class FireBalle : MonoBehaviour
 
     void Update()
     {
-        Vector3 direction = ((_target.position + new Vector3(0, _yoffset,0))-transform.position).normalized;
-        if(!_hasExploded)
+        if (_target == null) return; 
+
+        Vector3 direction = ((_target.position + new Vector3(0, _yoffset, 0)) - transform.position).normalized;
+        if (!_hasExploded)
         {
-            _rigidbody.velocity = direction*_speed;
+            _rigidbody.velocity = direction * _speed;
         }
     }
+
     public void SetTarget(Transform target)
     {
-
-        _target = target;
+        if (target != null)
+        {
+            _target = target;
+        }
+        else
+        {
+            Debug.LogWarning("SetTarget called with a null target!");
+        }
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<HealthAndDefense>() != null && !_hasExploded)
         {
             Explosion();
-            Debug.Log("Boom!!");
+            Debug.Log("Boom!!"+ other.GetComponent<HealthAndDefense>().name);
         }
     }
     private void Explosion()
     {
-        transform.localScale = Vector3.one*_radius * 2;
+        transform.localScale = Vector3.one * _radius * 2;
         _explosionVFx.SetActive(true);
+
         Collider[] hitCollider = Physics.OverlapSphere(transform.position, _radius);
-        foreach (Collider c in hitCollider) 
+        foreach (Collider c in hitCollider)
         {
             HealthAndDefense health = c.GetComponent<HealthAndDefense>();
-            if (health != null) {
+            if (health != null)
+            {
                 health.ReceiveDamage(_damage);
             }
-            _hasExploded = true;
-            _rigidbody.velocity = Vector3.zero;
-            Destroy(gameObject,_explosionDelay);
+        }
 
+        _hasExploded = true;
+        _rigidbody.velocity = Vector3.zero;
+
+        if (_explosionVFx != null)
+        {
+            Destroy(gameObject, _explosionDelay); // Détruire après le délai d'explosion
+        }
+        else
+        {
+            Debug.LogWarning("Explosion VFX is not assigned or destroyed.");
         }
     }
+
 }

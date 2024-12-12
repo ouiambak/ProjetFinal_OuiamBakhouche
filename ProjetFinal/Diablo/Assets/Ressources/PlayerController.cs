@@ -1,13 +1,15 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float _movementSpeed = 5f;
-    [SerializeField] private float _stopingDistance = 0.75f;
-    [SerializeField] private float _attackCoolDown = 1.5f;
+    [SerializeField] private float _stoppingDistance = 0.75f;
+    [SerializeField] private float _attackCooldown = 1.5f;
     [SerializeField] private int _damage = 5;
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private Material _blueMaterial;
+    [SerializeField] private float _powerEffectDuration = 5f;
     private Material _originalMaterial;
     private Renderer _playerRenderer;
 
@@ -16,22 +18,27 @@ public class PlayerController : MonoBehaviour
     private Camera _camera;
     private Vector3 _targetPosition;
     private HealthAndDefense _currentEnemy;
-    private bool _isWalking = false;
     private bool _isPowerEffectActive = false;
+    private Coroutine _powerEffectCoroutine;
+    private float _lastAttackTime = 0f;
 
     [Header("Audio")]
-    [SerializeField] private AudioClip _attackSound;         
-    [SerializeField] private AudioClip _knifeAttackSound;    
-    [SerializeField] private AudioClip _shieldCollectSound;   
-    private AudioSource _audioSource;                        
+    [SerializeField] private AudioClip _attackSound;
+    [SerializeField] private AudioClip _knifeAttackSound;
+    [SerializeField] private AudioClip _shieldCollectSound;
+    private AudioSource _audioSource;
 
     void Start()
     {
         _targetPosition = transform.position;
         _camera = Camera.main;
+        if (_camera == null) Debug.LogError("Main camera not found!");
+
         _rigidBody = GetComponent<Rigidbody>();
+        if (_rigidBody == null) Debug.LogError("Rigidbody not found on the player!");
+
         _animator = GetComponentInChildren<Animator>();
-        _animator.SetBool("IsWalking", false);
+        if (_animator == null) Debug.LogError("Animator not found in children!");
 
         _playerRenderer = GetComponentInChildren<Renderer>();
         if (_playerRenderer != null)
@@ -42,69 +49,46 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("Renderer not found on the player.");
         }
+
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
-            _audioSource = gameObject.AddComponent<AudioSource>(); 
+            _audioSource = gameObject.AddComponent<AudioSource>();
         }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            if (_isPowerEffectActive)
-            {
-                DeactivatePowerEffect();
-                _isPowerEffectActive = false;
-            }
-            else
-            {
-                ActivatePowerEffect();
-                _isPowerEffectActive = true;
-            }
-        }
+        // Detect closest enemy
+        DetectClosestEnemy();
 
+        // Move player to target position
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, _clickable))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
             {
                 _targetPosition = hit.point;
-                transform.LookAt(_targetPosition);
+                transform.LookAt(new Vector3(_targetPosition.x, transform.position.y, _targetPosition.z));
             }
         }
 
-        if (Input.GetMouseButton(1))
-        {
-            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, _clickable))
-            {
-                HealthAndDefense enemy = hit.collider.GetComponent<HealthAndDefense>();
-                if (enemy != null)
-                {
-                    _currentEnemy = enemy;
-                    FireAttack(); 
-                }
-            }
-        }
-
+        // Knife attack (space)
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (_currentEnemy != null)
-            {
-                KnifeAttack();
-            }
+            KnifeAttack();
         }
-
-        float distance = (transform.position - _targetPosition).magnitude;
-        Vector3 direction = (_targetPosition - transform.position).normalized;
-
-        if (distance > _stopingDistance)
+        if (Input.GetMouseButtonDown(1))
         {
-            _rigidBody.velocity = _movementSpeed * direction;
+            FireAttack();
+        }
+        // Player movement
+        float distance = Vector3.Distance(transform.position, _targetPosition);
+        if (distance > _stoppingDistance)
+        {
+            Vector3 direction = (_targetPosition - transform.position).normalized;
+            Vector3 newPosition = transform.position + (_movementSpeed * direction * Time.deltaTime);
+            _rigidBody.MovePosition(newPosition);
             _animator.SetBool("IsWalking", true);
         }
         else
@@ -113,56 +97,120 @@ public class PlayerController : MonoBehaviour
             _rigidBody.velocity = Vector3.zero;
         }
     }
-
+    // Ajoutez cette méthode dans PlayerController
     private void FireAttack()
     {
-        if (_currentEnemy != null)
+        float fireRadius = 5f; // Rayon de l'attaque de feu
+
+        // Détection des ennemis dans la zone
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, fireRadius);
+
+        foreach (var hitCollider in hitColliders)
         {
-            _animator.SetTrigger("IsAttacking");
-            PlaySound(_attackSound);
-            _currentEnemy.ReceiveDamage(_damage);
+            HealthAndDefense enemy = hitCollider.GetComponent<HealthAndDefense>();
+            if (enemy != null)
+            {
+                enemy.Kill(); // Tuer chaque ennemi touché
+            }
         }
+
+        _animator.SetTrigger("IsAttacking");
+        PlaySound(_attackSound);
+        Debug.Log("Fire attack performed. Enemies killed.");
     }
 
     private void KnifeAttack()
     {
-        if (_currentEnemy != null)
+        if (_currentEnemy == null)
         {
-            _animator.SetTrigger("IsCasting");
-            PlaySound(_knifeAttackSound); 
-            _currentEnemy.ReceiveDamage(_damage);
+            Debug.Log("No enemy targeted for KnifeAttack.");
+            ResetAttack();
+            return;
+        }
+
+        if (Time.time >= _lastAttackTime + _attackCooldown)
+        {
+            if (Vector3.Distance(transform.position, _currentEnemy.transform.position) < 2f)
+            {
+                _lastAttackTime = Time.time;
+                _animator.SetTrigger("IsCasting");
+                PlaySound(_knifeAttackSound);
+                _currentEnemy.ReceiveDamage(_damage);
+                Debug.Log("Knife attack successful.");
+            }
+            else
+            {
+                Debug.Log("Enemy is out of range.");
+                ResetAttack();
+            }
+        }
+        else
+        {
+            Debug.Log("KnifeAttack is on cooldown.");
         }
     }
 
     public void ResetAttack()
     {
+        StartCoroutine(ResetAttackAnimation());
+    }
+
+    private IEnumerator ResetAttackAnimation()
+    {
+        yield return new WaitForSeconds(0.5f); // Temps pour terminer l'animation
         _animator.SetTrigger("IsIdle");
+        Debug.Log("Attack animation reset.");
     }
 
-    private void ActivatePowerEffect()
+    private void DetectClosestEnemy()
     {
-        if (_playerRenderer != null && _blueMaterial != null)
+        float detectionRadius = 2f; // Rayon de détection pour les ennemis
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
+
+        float closestDistance = Mathf.Infinity;
+        HealthAndDefense closestEnemy = null;
+
+        foreach (var hitCollider in hitColliders)
         {
-            _playerRenderer.material = _blueMaterial;
+            HealthAndDefense enemy = hitCollider.GetComponent<HealthAndDefense>();
+            if (enemy != null)
+            {
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
+            }
         }
+
+        _currentEnemy = closestEnemy;
+        Debug.Log($"Detected enemy: {_currentEnemy?.name ?? "None"}");
     }
 
-    private void DeactivatePowerEffect()
-    {
-        if (_playerRenderer != null && _originalMaterial != null)
-        {
-            _playerRenderer.material = _originalMaterial;
-        }
-    }
-    private void PlaySound(AudioClip clip)
+    private void PlaySound(AudioClip clip, float volume = 1f)
     {
         if (_audioSource != null && clip != null)
         {
-            _audioSource.PlayOneShot(clip);
+            _audioSource.PlayOneShot(clip, volume);
         }
     }
+
     public void CollectShield()
     {
-        PlaySound(_shieldCollectSound); 
+        PlaySound(_shieldCollectSound);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        HealthBarController healthBar = GetComponent<HealthBarController>();
+        if (healthBar != null)
+        {
+            healthBar.UpdateHealth(damage);
+        }
+        else
+        {
+            Debug.LogError("HealthBarController not found on player!");
+        }
     }
 }

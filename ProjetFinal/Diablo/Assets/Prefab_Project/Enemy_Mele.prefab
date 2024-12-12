@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _health: 100
+  _maxHealth: 100
 --- !u!54 &7728737520319490915
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -96,6 +97,7 @@ MonoBehaviour:
   _attackRange: 1.5
   _attackCooldown: 2
   _damage: 10
+  _currentEnemy: {fileID: 7728737520319490913}
 --- !u!1001 &7728737520363994835
 PrefabInstance:
   m_ObjectHideFlags: 0

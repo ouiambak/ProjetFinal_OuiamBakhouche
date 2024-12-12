@@ -1,21 +1,21 @@
 using UnityEngine;
 
-public class EnnemieMeleeController : MonoBehaviour
+public class EnnemieRangController : MonoBehaviour
 {
     [SerializeField] private Animator _animator;
-    [SerializeField] private float _moveSpeed = 2f;
-    [SerializeField] private float _attackRange = 1.5f;
+    [SerializeField] private float _moveSpeed = 1f;
+    [SerializeField] private float _attackRange = 2f;
     [SerializeField] private float _attackCooldown = 2f;
+    [SerializeField] private GameObject _projectilePrefab;
+    [SerializeField] private Transform _firePoint;
+    [SerializeField] private float _projectileSpeed = 8f;
     [SerializeField] private int _damage = 10;
-    [SerializeField] private GameObject _currentEnemy;
-
     private Transform _hero;
     private bool _isDead = false;
     private bool _isAttacking = false;
     private float _lastAttackTime = 0f;
 
     private Rigidbody _rigidbody;
-    
 
     private void Start()
     {
@@ -42,23 +42,19 @@ public class EnnemieMeleeController : MonoBehaviour
 
     private void Update()
     {
-        if (!_isDead && _hero != null)
-        {
-            float distanceToHero = Vector3.Distance(transform.position, _hero.position);
+        if (_isDead || _hero == null) return;
 
-            if (distanceToHero > _attackRange)
-            {
-                FollowHero();
-                _animator.SetBool("IsAttacking", false);
-            }
-            else
-            {
-                AttackHero();
-            }
-        }
-        else if (!_isDead)
+        float distanceToHero = Vector3.Distance(transform.position, _hero.position);
+
+        if (distanceToHero > _attackRange)
         {
-            _animator.SetBool("IsBreathing", true);
+            FollowHero();
+            _animator.SetBool("IsShutting", false);
+        }
+        else
+        {
+            StopMoving();
+            AttackHero();
         }
 
         if (_isAttacking && !IsAttacking())
@@ -81,10 +77,7 @@ public class EnnemieMeleeController : MonoBehaviour
 
         _animator.SetBool("IsWalking", true);
         _animator.SetBool("IsBreathing", false);
-
-        Debug.Log($"Targeting enemy: {_currentEnemy?.name ?? "None"}");
     }
-
 
     private void AttackHero()
     {
@@ -93,23 +86,33 @@ public class EnnemieMeleeController : MonoBehaviour
         if (Time.time - _lastAttackTime >= _attackCooldown)
         {
             _lastAttackTime = Time.time;
-            _animator.SetTrigger("IsAttacking");
+            _animator.SetTrigger("IsShutting");
             _isAttacking = true;
-            Invoke(nameof(DealDamage), 0.5f);
+            Invoke(nameof(FireProjectile), 0.5f);
         }
     }
 
-    private void DealDamage()
+    private void FireProjectile()
     {
-        if (_hero.TryGetComponent<PlayerHealthAndDefense>(out PlayerHealthAndDefense playerHealth))
+        if (_projectilePrefab == null || _firePoint == null) return;
+        GameObject projectile = Instantiate(_projectilePrefab, _firePoint.position, _firePoint.rotation);
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
         {
-            playerHealth.ReceiveDamage(_damage);
+            Vector3 direction = (_hero.position - _firePoint.position).normalized;
+            rb.velocity = direction * _projectileSpeed;
+        }
+
+        feu proj = projectile.GetComponent<feu>();
+        if (proj != null)
+        {
+            proj.SetDamage(_damage);
         }
     }
 
     private void StopMoving()
     {
-        _rigidbody.velocity = Vector3.zero; 
+        _rigidbody.velocity = Vector3.zero;
         _animator.SetBool("IsWalking", false);
     }
 
@@ -124,8 +127,6 @@ public class EnnemieMeleeController : MonoBehaviour
         _isDead = true;
         _animator.SetBool("IsWalking", false);
         _animator.SetBool("IsDying", true);
-        _animator.SetBool("IsBreathing", false);
-        _animator.SetBool("IsAttacking", false);
-        _rigidbody.velocity = Vector3.zero; 
+        _rigidbody.velocity = Vector3.zero;
     }
 }

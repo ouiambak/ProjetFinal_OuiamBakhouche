@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class HealthAndDefense : MonoBehaviour
@@ -6,7 +8,16 @@ public class HealthAndDefense : MonoBehaviour
 
     public delegate void OnDeath();
     public event OnDeath OnEnemyDeath;
-
+    public float Health { get; private set; } = 100f;
+    public bool IsAlive => Health > 0;
+    [SerializeField] private int _maxHealth = 100;
+    private int _currentHealth;
+    private bool _isDead = false;
+    private void Start()
+    {
+        _currentHealth = _maxHealth;
+    }
+  
     public void TakeDamage(int damage)
     {
         _health -= damage;
@@ -16,21 +27,39 @@ public class HealthAndDefense : MonoBehaviour
             Die();
         }
     }
+    public void Kill()
+    {
+        if (!_isDead)
+        {
+            _isDead = true;
+            Debug.Log($"{gameObject.name} is killed.");
+            Die();
+        }
+    }
 
     public void ReceiveDamage(int damage)
     {
-        _health = damage;
-        Debug.Log("Health remaining: " + _health);
+        if (_isDead) return;
+
+        _currentHealth -= damage;
+
+        if (_currentHealth <= 0)
+        {
+            _currentHealth = 0;
+            Die();
+        }
     }
 
     private void Die()
     {
-        OnEnemyDeath?.Invoke();
-        Destroy(gameObject, 0.5f);
+        _isDead = true;
+        Debug.Log($"{gameObject.name} is dead.");
+        OnEnemyDeath?.Invoke(); // Déclenche l'événement
+        Destroy(gameObject); // Supprime l'ennemi de la scène
     }
 
     public bool IsDead()
     {
-        return _health <= 0;
+        return _isDead;
     }
 }
