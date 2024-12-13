@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _text;
+    [SerializeField] private TextMeshProUGUI _enemyKillCountText;
     [SerializeField] private Transform _playerTransform;
     public static GameManager _instance;
-    private int _numberOfObject;
-
+    private int _numberOfObject = 0;
     public static Transform PlayerTransform
     {
         get
@@ -50,6 +49,12 @@ public class GameManager : MonoBehaviour
 
     private void UpdateDisplay()
     {
-        _text.text = _numberOfObject.ToString();
+        if (_enemyKillCountText != null)
+        {
+            _enemyKillCountText.text = "Enemies Killed: " + _numberOfObject.ToString(); // Affiche le nombre
+        }
     }
+    
+
+ 
 }

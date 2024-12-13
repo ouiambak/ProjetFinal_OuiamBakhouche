@@ -2,42 +2,50 @@ using UnityEngine;
 
 public class feu : MonoBehaviour
 {
-    [SerializeField] private float _speed = 10f; // Vitesse du projectile
-    [SerializeField] private float _lifetime = 5f; // Durée de vie du projectile
-    private int _damage;
-    private Vector3 _targetPosition; // Position cible au moment du lancement
+    private Transform _target; 
+    private int _damage; 
 
-    private void Start()
+    [SerializeField] private float _speed = 10f;
+
+    public void SetTarget(Transform target)
     {
-       // Destroy(gameObject, _lifetime); // Détruire le projectile après un certain temps
+        _target = target;
     }
 
-    public void SetTarget(Vector3 targetPosition, int damage)
+    public void SetDamage(int damage)
     {
-        _targetPosition = targetPosition + new Vector3(0f,1.5f,0f); // Enregistrer la position cible
-        _damage = damage; // Enregistrer les dégâts du projectile
+        _damage = damage;
+    }
 
-        // Calcul de la direction initiale
-        Vector3 direction = (_targetPosition - transform.position).normalized;
-        GetComponent<Rigidbody>().velocity = direction * _speed; // Appliquer la vitesse au projectile
-        transform.rotation = Quaternion.LookRotation(direction); // Aligner le projectile avec la direction
+    void Update()
+    {
+        if (_target != null)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _target.position, _speed * Time.deltaTime);
+
+            if (Vector3.Distance(transform.position, _target.position) <= 0.1f)
+            {
+                DestroyProjectile();
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player")) // Vérifier si le projectile touche le héros
+        if (other.transform == _target)
         {
-            PlayerHealthAndDefense playerHealth = other.GetComponent<PlayerHealthAndDefense>();
-            if (playerHealth != null)
+            PlayerHealthAndDefense health = other.GetComponent<PlayerHealthAndDefense>();
+            if (health != null)
             {
-                playerHealth.ReceiveDamage(_damage); // Infliger des dégâts au héros
+                health.ReceiveDamage(_damage); 
+                Destroy(gameObject); 
+                Debug.Log("Projectile hit the hero and dealt damage!");
             }
+        }
+    }
 
-            //Destroy(gameObject); // Détruire le projectile après l'impact
-        }
-        else if (other.gameObject.layer == LayerMask.NameToLayer("Wall")) // Si le projectile touche un mur
-        {
-            //Destroy(gameObject); // Détruire le projectile
-        }
+    private void DestroyProjectile()
+    {
+        Destroy(gameObject); 
     }
 }

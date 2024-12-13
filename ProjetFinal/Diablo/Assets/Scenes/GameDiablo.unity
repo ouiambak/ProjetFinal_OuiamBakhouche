@@ -182,7 +182,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f73b210f4bbda4c1e91abb0943bc2284, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0e109cc765663184a8408a68bce113f8, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -212,7 +212,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad32fb8a23b02954cbd5f2fb8d6f6c55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _healthBarImage: {fileID: 17890002}
+  healthBarImage: {fileID: 17890002}
+  maxHealth: 100
 --- !u!4 &49869245 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 6d7bcebe78eeff74daaa56ffe40b7b83, type: 3}
@@ -1173,9 +1174,10 @@ GameObject:
   - component: {fileID: 212569034}
   - component: {fileID: 212569036}
   - component: {fileID: 212569035}
+  - component: {fileID: 212569037}
   m_Layer: 0
   m_Name: SM_Item_Sword (1)
-  m_TagString: Untagged
+  m_TagString: Sword
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1245,6 +1247,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 212569033}
   m_Mesh: {fileID: 4300016, guid: b69174d668ba02d44b14a084b217670a, type: 3}
+--- !u!65 &212569037
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 212569033}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 55.957516, y: 150.45366, z: 15.228115}
+  m_Center: {x: -2.4778545, y: -16.5939, z: -2.8105643}
 --- !u!4 &242232247 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 6d7bcebe78eeff74daaa56ffe40b7b83, type: 3}
@@ -5211,7 +5226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c22166f3a673bb44ad940ad882bd9de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _text: {fileID: 144447598}
+  _enemyKillCountText: {fileID: 144447598}
   _playerTransform: {fileID: 1761891306}
 --- !u!114 &1151357676
 MonoBehaviour:
@@ -5572,6 +5587,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1287811910}
   - component: {fileID: 1287811911}
+  - component: {fileID: 1287811912}
   m_Layer: 0
   m_Name: Fireball
   m_TagString: Untagged
@@ -5611,6 +5627,103 @@ MonoBehaviour:
   _collDownDelay: 4
   _animationDelay: 0.4
   _animator: {fileID: 1570638489}
+  _FireSound: {fileID: 8300000, guid: e9c380d3a3f8f914498ea652da57b857, type: 3}
+--- !u!82 &1287811912
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1287811909}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &1293968800
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6748,6 +6861,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 7b0eeb968fb26de4b9129fb1b1d13542, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 7b0eeb968fb26de4b9129fb1b1d13542, type: 3}
       propertyPath: m_RootOrder
       value: 25
@@ -7004,10 +7121,11 @@ MonoBehaviour:
   _damage: 5
   _clickable:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 576
   _blueMaterial: {fileID: 2100000, guid: 49b95f6fc70994a4dae8dc28e3258f15, type: 2}
   _powerEffectDuration: 5
-  _attackSound: {fileID: 8300000, guid: e9c380d3a3f8f914498ea652da57b857, type: 3}
+  _stopingDistance: 0.75
+  _attackCoolDown: 1.5
   _knifeAttackSound: {fileID: 8300000, guid: 7f4f71df3de37e94e8583673a1f71bb5, type: 3}
   _shieldCollectSound: {fileID: 8300000, guid: d02f140234b3be94db0e2de80c6f3247, type: 3}
 --- !u!4 &1761891306
@@ -7039,8 +7157,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 039d15ed4800d0c4fb9421a7351fd6dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 10000
-  _healthBarController: {fileID: 17890004}
+  maxHealth: 100
+  healthBarController: {fileID: 17890004}
 --- !u!114 &1761891308
 MonoBehaviour:
   m_ObjectHideFlags: 0

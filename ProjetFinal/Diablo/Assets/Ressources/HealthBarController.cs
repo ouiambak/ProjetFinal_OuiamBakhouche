@@ -3,13 +3,29 @@ using UnityEngine.UI;
 
 public class HealthBarController : MonoBehaviour
 {
-    [SerializeField] private UnityEngine.UI.Image _healthBarImage;
+    [SerializeField] private Image healthBarImage;
+    [SerializeField] private float maxHealth = 100f;
+    private float currentHealth;
 
-    public void UpdateHealth(float healthPercentage)
+    private void Start()
     {
-        if (_healthBarImage != null)
+        currentHealth = maxHealth;
+        UpdateHealth();
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        UpdateHealth();
+    }
+
+    public void UpdateHealth()
+    {
+        if (healthBarImage != null)
         {
-            _healthBarImage.fillAmount = healthPercentage;
+            float healthPercentage = currentHealth / maxHealth;
+            healthBarImage.fillAmount = healthPercentage;
         }
     }
 }

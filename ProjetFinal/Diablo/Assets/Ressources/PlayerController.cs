@@ -10,28 +10,42 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private Material _blueMaterial;
     [SerializeField] private float _powerEffectDuration = 5f;
+
+    [SerializeField] private float _stopingDistance = 0.75f;
+    [SerializeField] private float _attackCoolDown = 1.5f;
+
     private Material _originalMaterial;
     private Renderer _playerRenderer;
-
+    
     private Animator _animator;
     private Rigidbody _rigidBody;
     private Camera _camera;
     private Vector3 _targetPosition;
     private HealthAndDefense _currentEnemy;
     private bool _isPowerEffectActive = false;
+    private bool _attackIsActive;
+    private bool _isWalking = false;
+    private bool _isAttacking = false;
+    private bool _isCasting = false;
+    private bool _isDying = false;
+    private bool _isBlueEffectActive = false;
     private Coroutine _powerEffectCoroutine;
     private float _lastAttackTime = 0f;
-
+    
     [Header("Audio")]
-    [SerializeField] private AudioClip _attackSound;
     [SerializeField] private AudioClip _knifeAttackSound;
     [SerializeField] private AudioClip _shieldCollectSound;
     private AudioSource _audioSource;
-
+    
+    
     void Start()
     {
-        _targetPosition = transform.position;
+        _targetPosition = new Vector3(0, 2.3f, 0);
         _camera = Camera.main;
+        _rigidBody = GetComponent<Rigidbody>();
+        _animator = GetComponentInChildren<Animator>();
+        _animator.SetBool("IsWalking", false);
+        _audioSource = GetComponent<AudioSource>();
         if (_camera == null) Debug.LogError("Main camera not found!");
 
         _rigidBody = GetComponent<Rigidbody>();
@@ -57,12 +71,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+
     void Update()
     {
-        // Detect closest enemy
-        DetectClosestEnemy();
-
-        // Move player to target position
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
@@ -70,25 +81,38 @@ public class PlayerController : MonoBehaviour
             {
                 _targetPosition = hit.point;
                 transform.LookAt(new Vector3(_targetPosition.x, transform.position.y, _targetPosition.z));
+           
+                    HealthAndDefense enemy = hit.collider.GetComponent<HealthAndDefense>();
+
+                    if (enemy != null)
+                    {
+                        _currentEnemy = enemy;
+                        _attackIsActive = true;
+                    }
+                    else
+                    {
+                        _currentEnemy = null;
+                        _targetPosition = hit.point;
+                        transform.LookAt(_targetPosition);
+                    }
+                
             }
+            
         }
 
-        // Knife attack (space)
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (_currentEnemy != null)
         {
-            KnifeAttack();
+            _targetPosition = _currentEnemy.transform.position;
+            transform.LookAt(_currentEnemy.transform.position);
         }
-        if (Input.GetMouseButtonDown(1))
+
+
+        float distance = (transform.position - _targetPosition).magnitude;
+        Vector3 direction = (_targetPosition - transform.position).normalized;
+
+        if (distance > _stopingDistance)
         {
-            FireAttack();
-        }
-        // Player movement
-        float distance = Vector3.Distance(transform.position, _targetPosition);
-        if (distance > _stoppingDistance)
-        {
-            Vector3 direction = (_targetPosition - transform.position).normalized;
-            Vector3 newPosition = transform.position + (_movementSpeed * direction * Time.deltaTime);
-            _rigidBody.MovePosition(newPosition);
+            _rigidBody.velocity = _movementSpeed * direction;
             _animator.SetBool("IsWalking", true);
         }
         else
@@ -96,75 +120,66 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool("IsWalking", false);
             _rigidBody.velocity = Vector3.zero;
         }
-    }
-    // Ajoutez cette méthode dans PlayerController
-    private void FireAttack()
-    {
-        float fireRadius = 5f; // Rayon de l'attaque de feu
 
-        // Détection des ennemis dans la zone
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, fireRadius);
-
-        foreach (var hitCollider in hitColliders)
+        if (_attackIsActive && distance < _stopingDistance)
         {
-            HealthAndDefense enemy = hitCollider.GetComponent<HealthAndDefense>();
-            if (enemy != null)
-            {
-                enemy.Kill(); // Tuer chaque ennemi touché
-            }
-        }
-
-        _animator.SetTrigger("IsAttacking");
-        PlaySound(_attackSound);
-        Debug.Log("Fire attack performed. Enemies killed.");
-    }
-
-    private void KnifeAttack()
-    {
-        if (_currentEnemy == null)
-        {
-            Debug.Log("No enemy targeted for KnifeAttack.");
-            ResetAttack();
-            return;
-        }
-
-        if (Time.time >= _lastAttackTime + _attackCooldown)
-        {
-            if (Vector3.Distance(transform.position, _currentEnemy.transform.position) < 2f)
-            {
-                _lastAttackTime = Time.time;
-                _animator.SetTrigger("IsCasting");
-                PlaySound(_knifeAttackSound);
-                _currentEnemy.ReceiveDamage(_damage);
-                Debug.Log("Knife attack successful.");
-            }
-            else
-            {
-                Debug.Log("Enemy is out of range.");
-                ResetAttack();
-            }
+            Attack();
         }
         else
         {
-            Debug.Log("KnifeAttack is on cooldown.");
+            ResetAttack();
         }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (_isBlueEffectActive)
+            {
+               
+                ResetBlueEffect();
+            }
+            else
+            {
+               
+                ActivateBlueEffect();
+            }
+        }
+
+    }
+
+    private void Attack()
+    {
+        _animator.SetBool("IsAttacking", true);
+        _attackIsActive = false;
+        PlaySound(_knifeAttackSound);
+        _currentEnemy.ReceiveDamage(_damage);
     }
 
     public void ResetAttack()
     {
-        StartCoroutine(ResetAttackAnimation());
+        _animator.SetBool("IsAttacking", false);
     }
 
-    private IEnumerator ResetAttackAnimation()
+    private void SetWalkingAnimation(bool isWalking)
     {
-        yield return new WaitForSeconds(0.5f); // Temps pour terminer l'animation
-        _animator.SetTrigger("IsIdle");
-        Debug.Log("Attack animation reset.");
+        _animator.SetBool("isWalking", isWalking);
     }
+    private void SetAttackingAnimation(bool isWalking)
+    {
+        _animator.SetBool("isAttacking", isWalking);
+    }
+    private void SetCastingAnimation(bool isWalking)
+    {
+        _animator.SetBool("isCasting", isWalking);
+    }
+    private void SetDyingAnimation(bool isWalking)
+    {
+        _animator.SetBool("isDying", isWalking);
+    }
+    
 
     private void DetectClosestEnemy()
     {
-        float detectionRadius = 2f; // Rayon de détection pour les ennemis
+        float detectionRadius = 2f; 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
 
         float closestDistance = Mathf.Infinity;
@@ -201,16 +216,46 @@ public class PlayerController : MonoBehaviour
         PlaySound(_shieldCollectSound);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage()
     {
         HealthBarController healthBar = GetComponent<HealthBarController>();
         if (healthBar != null)
         {
-            healthBar.UpdateHealth(damage);
+            healthBar.UpdateHealth();
         }
         else
         {
             Debug.LogError("HealthBarController not found on player!");
         }
     }
+
+    public void Die()
+    {
+        if (_animator.GetBool("isDying")) return;
+
+        _animator.SetTrigger("isDying");
+        Debug.Log("Player is dying.");
+    }
+
+    private void ActivateBlueEffect()
+    {
+        if (_playerRenderer != null && _blueMaterial != null)
+        {
+            _playerRenderer.material = _blueMaterial; 
+            _isBlueEffectActive = true;               
+            Debug.Log("Blue effect activated!");
+        }
+    }
+
+    private void ResetBlueEffect()
+    {
+        if (_playerRenderer != null && _originalMaterial != null)
+        {
+            _playerRenderer.material = _originalMaterial; 
+            _isBlueEffectActive = false;                  
+            Debug.Log("Blue effect reset!");
+        }
+    }
+
 }
+

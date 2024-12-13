@@ -7,17 +7,17 @@ public class RangedEnemy : MonoBehaviour
     [SerializeField] private float _attackRange = 10f;
     [SerializeField] private float _attackCooldown = 2f;
     [SerializeField] private GameObject _projectilePrefab;
-    [SerializeField] private Transform _firePoint; // L'objet vide
+    [SerializeField] private Transform _firePoint; 
     [SerializeField] private float _projectileSpeed = 8f;
     [SerializeField] private int _damage = 10;
 
     private Transform _hero;
     private bool _isDead = false;
     private float _lastAttackTime = 0f;
+    private Rigidbody _rigidBody;
 
     private void Start()
     {
-        // Obtenir la référence du héros
         _hero = GameManager.PlayerTransform;
         if (_hero == null)
         {
@@ -26,10 +26,15 @@ public class RangedEnemy : MonoBehaviour
             return;
         }
 
-        // Vérifiez que le FirePoint est assigné
         if (_firePoint == null)
         {
             Debug.LogError("FirePoint is not assigned in the inspector!");
+        }
+
+        _rigidBody = GetComponent<Rigidbody>();
+        if (_rigidBody == null)
+        {
+            Debug.LogError("Rigidbody not found on the RangedEnemy.");
         }
     }
 
@@ -53,11 +58,12 @@ public class RangedEnemy : MonoBehaviour
     private void FollowHero()
     {
         Vector3 directionToHero = (_hero.position - transform.position).normalized;
+
         Quaternion lookRotation = Quaternion.LookRotation(directionToHero);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
 
         Vector3 moveDirection = directionToHero * _moveSpeed;
-        transform.position += moveDirection * Time.deltaTime;
+        _rigidBody.velocity = new Vector3(moveDirection.x, _rigidBody.velocity.y, moveDirection.z); 
 
         _animator.SetBool("IsWalking", true);
     }
@@ -77,23 +83,21 @@ public class RangedEnemy : MonoBehaviour
     {
         if (_projectilePrefab == null || _firePoint == null) return;
 
-        // Instancier le projectile au point de tir
         GameObject projectile = Instantiate(_projectilePrefab, _firePoint.position, _firePoint.rotation);
 
-        // Définir la cible et les dégâts pour le projectile
         feu proj = projectile.GetComponent<feu>();
         if (proj != null)
         {
-            proj.SetTarget(_hero.position, _damage); // Passer la position du héros et les dégâts au projectile
+            proj.SetTarget(_hero); 
+            proj.SetDamage(_damage); 
         }
 
         Debug.Log("Projectile fired towards the hero!");
     }
 
-
-
     private void StopMoving()
     {
+        _rigidBody.velocity = Vector3.zero;
         _animator.SetBool("IsWalking", false);
     }
 

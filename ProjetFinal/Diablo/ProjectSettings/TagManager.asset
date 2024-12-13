@@ -7,6 +7,8 @@ TagManager:
   - Collectable
   - RightDoor
   - LeftDoor
+  - FireBalle
+  - Sword
   layers:
   - Default
   - TransparentFX
@@ -17,7 +19,7 @@ TagManager:
   - Floor
   - Wall
   - Puzzle
-  - 
+  - Ennemie
   - 
   - 
   - 
