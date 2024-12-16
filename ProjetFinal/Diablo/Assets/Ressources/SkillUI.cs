@@ -11,7 +11,8 @@ public class SkillUI : MonoBehaviour
     {
         if (isActive)
         {
-            _skillCoolDown.color = _blueColor; 
+            _skillCoolDown.color = _blueColor;
+           
         }
         else
         {

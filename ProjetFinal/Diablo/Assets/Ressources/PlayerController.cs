@@ -33,7 +33,6 @@ public class PlayerController : MonoBehaviour
     private bool _isBlueEffectActive = false;
     private Coroutine _powerEffectCoroutine;
     private float _lastAttackTime = 0f;
-  
 
     [Header("Audio")]
     [SerializeField] private AudioClip _knifeAttackSound;
@@ -246,6 +245,7 @@ public class PlayerController : MonoBehaviour
        
         _skillUI.ActivateBluePower(_isBluePowerActive);
     }
+   
     private void ActivateBlueEffect()
     {
         if (_playerRenderer != null && _blueMaterial != null)
