@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,10 +11,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private Material _blueMaterial;
     [SerializeField] private float _powerEffectDuration = 5f;
-
+    [SerializeField] private SkillUI _skillUI;  
+    [SerializeField] private bool _isBluePowerActive = false;  
     [SerializeField] private float _stopingDistance = 0.75f;
     [SerializeField] private float _attackCoolDown = 1.5f;
-
+    [SerializeField] private TextMeshProUGUI _textMeshPro;
     private Material _originalMaterial;
     private Renderer _playerRenderer;
     
@@ -31,7 +33,8 @@ public class PlayerController : MonoBehaviour
     private bool _isBlueEffectActive = false;
     private Coroutine _powerEffectCoroutine;
     private float _lastAttackTime = 0f;
-    
+  
+
     [Header("Audio")]
     [SerializeField] private AudioClip _knifeAttackSound;
     [SerializeField] private AudioClip _shieldCollectSound;
@@ -132,16 +135,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            if (_isBlueEffectActive)
-            {
-               
-                ResetBlueEffect();
-            }
-            else
-            {
-               
-                ActivateBlueEffect();
-            }
+            ToggleBluePower();  
         }
 
     }
@@ -236,7 +230,22 @@ public class PlayerController : MonoBehaviour
         _animator.SetTrigger("isDying");
         Debug.Log("Player is dying.");
     }
-
+    private void ToggleBluePower()
+    {
+        if (_isBluePowerActive)
+        {
+            ResetBlueEffect();
+            _textMeshPro.SetText("Skills of Heros");
+        }
+        else
+        {
+            ActivateBlueEffect();
+            _textMeshPro.SetText("Blue Power is activated");
+        }
+        _isBluePowerActive = !_isBluePowerActive;
+       
+        _skillUI.ActivateBluePower(_isBluePowerActive);
+    }
     private void ActivateBlueEffect()
     {
         if (_playerRenderer != null && _blueMaterial != null)

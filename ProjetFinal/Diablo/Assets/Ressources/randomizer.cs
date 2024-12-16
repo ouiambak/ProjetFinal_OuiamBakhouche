@@ -8,7 +8,7 @@ public class randomizer : MonoBehaviour
     [SerializeField] private GameObject _meleeEnemyGenerator;
     [SerializeField] private GameObject _rangeEnemeyGenerator;
     private List<Vector3> _allPosition = new List<Vector3>();
-
+    [SerializeField] private Vector3 _interactifOffset = new Vector3(0f,2f,0f);
     void Start()
     {
         foreach (Transform child in transform)
@@ -17,7 +17,7 @@ public class randomizer : MonoBehaviour
         }
         int index = Random.Range(0, _allPosition.Count);
         Vector3 randomPos = _allPosition[index];
-        Instantiate(_interactiveElement, randomPos, Quaternion.identity, transform);
+        Instantiate(_interactiveElement, randomPos+ _interactifOffset, Quaternion.identity, transform);
         _allPosition.RemoveAt(index);
 
         index = Random.Range(0, _allPosition.Count);
